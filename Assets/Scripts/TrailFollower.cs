@@ -40,4 +40,13 @@ public class TrailFollower : MonoBehaviour
             currentIndex++;
         }
     }
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.Log("Game Over!");
+
+            Time.timeScale = 0f; // freezes the game
+        }
+    }
 }
