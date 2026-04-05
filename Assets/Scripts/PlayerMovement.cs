@@ -47,5 +47,11 @@ public class PlayerMovement : MonoBehaviour
             Debug.Log("Game Over");
             Time.timeScale = 0f;
         }
+
+        if (other.CompareTag("Token"))
+        {
+            Destroy(other.gameObject);
+            Debug.Log("Collected Token!");
+        }
     }
 }

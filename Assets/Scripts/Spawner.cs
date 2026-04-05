@@ -3,6 +3,7 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public GameObject obstaclePrefab;
+    public GameObject tokenPrefab;
     public float spawnRate = 1.5f;
 
     public Color groundColor;
@@ -52,7 +53,7 @@ public class Spawner : MonoBehaviour
 
         obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
 
-        // Set color based on position
+        // Set color
         SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
 
         if (sr != null)
@@ -62,5 +63,17 @@ public class Spawner : MonoBehaviour
             else
                 sr.color = ceilingColor;
         }
+
+        // SPAWN TOKEN BETWEEN OBSTACLES
+        SpawnTokenBetween();
+    }
+    
+    void SpawnTokenBetween()
+    {
+        float y = Random.Range(-1.5f, 1.5f); // middle area (safe zone)
+
+        Vector3 tokenPos = new Vector3(10f, y, 0f);
+
+        Instantiate(tokenPrefab, tokenPos, Quaternion.identity);
     }
 }
