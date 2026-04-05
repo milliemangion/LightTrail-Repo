@@ -3,27 +3,58 @@ using UnityEngine;
 public class Spawner : MonoBehaviour
 {
     public GameObject obstaclePrefab;
-    public float spawnRate = 2f;
+    public float spawnRate = 1.5f;
 
-    void Start()
+    public Color groundColor;
+    public Color ceilingColor;
+
+    private float timer = 0f;
+    private float speedTimer = 0f;
+
+    void Update()
     {
-        InvokeRepeating("SpawnObstacle", 1f, spawnRate);
+        // Spawn timer
+        timer += Time.deltaTime;
+
+        if (timer >= spawnRate)
+        {
+            Spawn();
+            timer = 0f;
+        }
+
+        // Speed increase every 30 seconds
+        speedTimer += Time.deltaTime;
+
+        if (speedTimer >= 10f)
+        {
+            ObstacleMover.globalSpeed += 0.2f;
+            speedTimer = 0f;
+        }
     }
 
-    void SpawnObstacle()
+    void Spawn()
     {
-        float yPos;
+        float y = Random.value > 0.5f ? -2f : 2f;
 
-        // Randomly spawn on ground or ceiling
-        if (Random.value > 0.5f)
-        {
-            yPos = -2f; // ground
-        }
-        else
-        {
-            yPos = 2f; // ceiling
-        }
+        Vector3 spawnPos = new Vector3(10f, y, 0f);
 
-        Instantiate(obstaclePrefab, new Vector2(transform.position.x, yPos), Quaternion.identity);
+        GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);
+
+        // Random size
+        float randomWidth = Random.Range(0.5f, 2f);
+        float randomHeight = Random.Range(1f, 3.5f);
+
+        obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
+
+        // Set color based on position
+        SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
+
+        if (sr != null)
+        {
+            if (y < 0)
+                sr.color = groundColor;
+            else
+                sr.color = ceilingColor;
+        }
     }
 }

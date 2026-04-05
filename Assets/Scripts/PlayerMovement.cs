@@ -16,8 +16,8 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Constant forward movement
-        rb.linearVelocity = new Vector2(speed, rb.linearVelocity.y);
+        // Keep player in place horizontally
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
 
         // Flip gravity on key press
         if (Input.GetKeyDown(KeyCode.Space))
@@ -39,13 +39,13 @@ public class PlayerMovement : MonoBehaviour
             transform.localScale.z
         );
     }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Obstacle"))
         {
             Debug.Log("Game Over");
-
-            Time.timeScale = 0f; // freeze game
+            Time.timeScale = 0f;
         }
     }
 }
