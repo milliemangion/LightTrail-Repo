@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class TrailFollower : MonoBehaviour
@@ -39,14 +39,31 @@ public class TrailFollower : MonoBehaviour
         {
             currentIndex++;
         }
+
+        // Face movement direction
+        Vector3 direction = (playerTrail.transform.position - transform.position).normalized;
+
+        if (direction != Vector3.zero)
+        {
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle);
+        }
     }
+
     void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
             Debug.Log("Game Over!");
 
-            Time.timeScale = 0f; // freezes the game
+            Time.timeScale = 0.2f;
+            StartCoroutine(FreezeAfterDelay());
         }
+    }
+
+    IEnumerator FreezeAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(0.5f);
+        Time.timeScale = 0f;
     }
 }

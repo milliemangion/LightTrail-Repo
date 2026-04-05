@@ -20,6 +20,9 @@ public class PlayerMovement : MonoBehaviour
 
         // Normalize to prevent faster diagonal movement
         movement = movement.normalized;
+        
+        float scale = 1 + Mathf.Sin(Time.time * 10f) * 0.05f;
+        transform.localScale = new Vector3(scale, scale, 1);
     }
 
     void FixedUpdate()
