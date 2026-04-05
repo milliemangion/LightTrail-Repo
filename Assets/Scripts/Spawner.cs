@@ -22,13 +22,19 @@ public class Spawner : MonoBehaviour
             timer = 0f;
         }
 
-        // Speed increase every 30 seconds
+        // Speed increase every 10 seconds
         speedTimer += Time.deltaTime;
 
         if (speedTimer >= 10f)
         {
-            ObstacleMover.globalSpeed += 0.2f;
+            ObstacleMover.globalSpeed += 0.1f;
             speedTimer = 0f;
+        }
+
+        // Increase spawn frequency over time
+        if (spawnRate > 0.5f)
+        {
+            spawnRate -= Time.deltaTime * 0.05f;
         }
     }
 
