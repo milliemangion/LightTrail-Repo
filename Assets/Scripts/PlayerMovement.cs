@@ -30,4 +30,25 @@ public class PlayerMovement : MonoBehaviour
         // Move the player
         rb.linearVelocity = movement * moveSpeed;
     }
+    
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            Die();
+        }
+    }
+    
+    void Die()
+    {
+        Debug.Log("Hit Wall!");
+
+        Time.timeScale = 0.2f;
+        Invoke("FreezeGame", 0.5f);
+    }
+
+    void FreezeGame()
+    {
+        Time.timeScale = 0f;
+    }
 }
