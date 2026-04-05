@@ -33,9 +33,9 @@ public class Spawner : MonoBehaviour
         }
 
         // Increase spawn frequency over time
-        if (spawnRate > 0.5f)
+        if (spawnRate > 0.6f) // slightly safer minimum
         {
-            spawnRate -= Time.deltaTime * 0.05f;
+            spawnRate -= Time.deltaTime * 0.03f;
         }
     }
 
@@ -49,7 +49,7 @@ public class Spawner : MonoBehaviour
 
         // Random size
         float randomWidth = Random.Range(0.5f, 2f);
-        float randomHeight = Random.Range(1f, 3.5f);
+        float randomHeight = Random.Range(1f, 3f);
 
         obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
 
@@ -58,19 +58,20 @@ public class Spawner : MonoBehaviour
 
         if (sr != null)
         {
-            if (y < 0)
-                sr.color = groundColor;
-            else
-                sr.color = ceilingColor;
+            sr.color = (y < 0) ? groundColor : ceilingColor;
         }
 
-        // SPAWN TOKEN BETWEEN OBSTACLES
-        SpawnTokenBetween();
+        // Only spawn token sometimes (prevents spam)
+        if (Random.value > 0.3f)
+        {
+            SpawnTokenBetween();
+        }
     }
-    
+
     void SpawnTokenBetween()
     {
-        float y = Random.Range(-1.5f, 1.5f); // middle area (safe zone)
+        // Slight variation but still safe
+        float y = Random.Range(-0.8f, 0.8f);
 
         Vector3 tokenPos = new Vector3(10f, y, 0f);
 
