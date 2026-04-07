@@ -131,7 +131,6 @@ GameObject:
   - component: {fileID: 233703445}
   - component: {fileID: 233703444}
   - component: {fileID: 233703447}
-  - component: {fileID: 233703448}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -156,8 +155,8 @@ Camera:
   m_GameObject: {fileID: 233703443}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -257,21 +256,6 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!114 &233703448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 233703443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c3b2ed57ac8cc042bd97c9a5ced092a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 0}
-  smoothSpeed: 5
-  offset: {x: 0, y: 2, z: -10}
 --- !u!1 &521669811
 GameObject:
   m_ObjectHideFlags: 0
@@ -319,8 +303,9 @@ MonoBehaviour:
   obstaclePrefab: {fileID: 7902590545825635186, guid: 6c5241785dff68544936620fe9cfe822, type: 3}
   tokenPrefab: {fileID: 8932729982557665428, guid: 322ad435013bc4d4c8a056bb476bd860, type: 3}
   spawnRate: 1.5
-  groundColor: {r: 0.003921569, g: 0.027450982, b: 0.16078432, a: 1}
-  ceilingColor: {r: 0.1764706, g: 0, b: 0.45098042, a: 1}
+  minSpawnRate: 0.4
+  groundColor: {r: 0.2627451, g: 1, b: 0.36862746, a: 1}
+  ceilingColor: {r: 0, g: 0.7411765, b: 1, a: 1}
 --- !u!1 &1700488053
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,7 +421,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.0097701475, g: 0.026811643, b: 0.16352195, a: 1}
+  m_Color: {r: 0.2627451, g: 1, b: 0.36862746, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -590,7 +575,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.17841777, g: 0, b: 0.4528302, a: 1}
+  m_Color: {r: 0, g: 0.74078023, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -744,7 +729,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.17841777, g: 0, b: 0.4528302, a: 1}
+  m_Color: {r: 0, g: 0.7411765, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1079,7 +1064,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.0097701475, g: 0.026811643, b: 0.16352195, a: 1}
+  m_Color: {r: 0.26100624, g: 1, b: 0.36720368, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
