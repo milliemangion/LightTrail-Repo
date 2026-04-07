@@ -37,13 +37,13 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator RotatePlayer()
     {
-        float duration = 0.15f; // snappier
+        float duration = 0.15f;
         float elapsed = 0f;
 
         float startRotation = transform.eulerAngles.z;
         float targetRotation = isUpsideDown ? 180f : 0f;
 
-        // Fix rotation wrap (prevents weird spins)
+        // Prevent weird spin
         if (Mathf.Abs(startRotation - targetRotation) > 180f)
         {
             if (startRotation > targetRotation)
@@ -67,16 +67,17 @@ public class PlayerMovement : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
+        // 💀 Game Over
         if (other.CompareTag("Obstacle"))
         {
-            Debug.Log("Game Over");
-            Time.timeScale = 0f;
+            GameManager.instance.GameOver();
         }
 
+        // ⭐ Collect Token
         if (other.CompareTag("Token"))
         {
             Destroy(other.gameObject);
-            Debug.Log("Collected Token!");
+            GameManager.instance.AddScore(1);
         }
     }
 }
