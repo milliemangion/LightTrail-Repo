@@ -12,6 +12,8 @@ public class Spawner : MonoBehaviour
     private float timer = 0f;
     private float speedTimer = 0f;
 
+    private bool spawnTokenNext = false;
+
     void Update()
     {
         // Spawn timer
@@ -33,7 +35,7 @@ public class Spawner : MonoBehaviour
         }
 
         // Increase spawn frequency over time
-        if (spawnRate > 0.6f) // slightly safer minimum
+        if (spawnRate > 0.6f)
         {
             spawnRate -= Time.deltaTime * 0.03f;
         }
@@ -41,37 +43,42 @@ public class Spawner : MonoBehaviour
 
     void Spawn()
     {
-        float y = Random.value > 0.5f ? -2f : 2f;
-
-        Vector3 spawnPos = new Vector3(10f, y, 0f);
-
-        GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);
-
-        // Random size
-        float randomWidth = Random.Range(0.5f, 2f);
-        float randomHeight = Random.Range(1f, 3f);
-
-        obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
-
-        // Set color
-        SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
-
-        if (sr != null)
+        if (!spawnTokenNext)
         {
-            sr.color = (y < 0) ? groundColor : ceilingColor;
+            // 🔴 SPAWN OBSTACLE
+            float y = Random.value > 0.5f ? -2f : 2f;
+
+            Vector3 spawnPos = new Vector3(10f, y, 0f);
+
+            GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);
+
+            // Random size
+            float randomWidth = Random.Range(0.5f, 2f);
+            float randomHeight = Random.Range(1f, 3f);
+
+            obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
+
+            // Set color
+            SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = (y < 0) ? groundColor : ceilingColor;
+            }
+
+            spawnTokenNext = true; // next spawn will be token
         }
-
-        // Only spawn token sometimes (prevents spam)
-        if (Random.value > 0.3f)
+        else
         {
+            // ⭐ SPAWN TOKEN BETWEEN OBSTACLES
             SpawnTokenBetween();
+            spawnTokenNext = false; // next spawn will be obstacle
         }
     }
 
     void SpawnTokenBetween()
     {
-        // Slight variation but still safe
-        float y = Random.Range(-0.8f, 0.8f);
+        // Place token in safe lane between floor & ceiling
+        float y = Random.value > 0.5f ? -1.5f : 1.5f;
 
         Vector3 tokenPos = new Vector3(10f, y, 0f);
 
