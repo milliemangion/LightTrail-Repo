@@ -7,7 +7,7 @@ public class Spawner : MonoBehaviour
     public GameObject tokenPrefab;
 
     public float spawnRate = 1.5f;
-    public float minSpawnRate = 0.5f;
+    public float minSpawnRate = 0.8f;
 
     public Color groundColor;
     public Color ceilingColor;
@@ -15,86 +15,74 @@ public class Spawner : MonoBehaviour
     private float _timer;
     private float _speedTimer;
 
-    // Track last lane to prevent unfair repeats
     private float _lastLane = 0f;
+    private bool _canSpawn = true;
 
     void Update()
     {
         _timer += Time.deltaTime;
 
-        if (_timer >= spawnRate)
+        if (_timer >= spawnRate && _canSpawn)
         {
-            SpawnPattern();
+            StartCoroutine(SpawnPattern());
             _timer = 0f;
         }
 
-        // Speed scaling
+        // ✅ Smooth difficulty (every 25s)
         _speedTimer += Time.deltaTime;
 
-        if (_speedTimer >= 10f)
+        if (_speedTimer >= 25f)
         {
-            ObstacleMover.globalSpeed += 0.12f;
+            ObstacleMover.globalSpeed += 0.05f;
             _speedTimer = 0f;
         }
 
-        // Spawn rate scaling
+        // ✅ Slower difficulty ramp
         if (spawnRate > minSpawnRate)
         {
-            spawnRate -= Time.deltaTime * 0.04f;
+            spawnRate -= Time.deltaTime * 0.02f;
         }
     }
 
-    void SpawnPattern()
+    IEnumerator SpawnPattern()
     {
-        int pattern = Random.Range(0, 3);
+        _canSpawn = false;
 
-        switch (pattern)
+        int pattern = Random.Range(0, 2); // fewer patterns = safer
+
+        if (pattern == 0)
         {
-            case 0:
-                // SAFE single obstacle
-                float lane = GetSafeLane();
-                SpawnObstacle(lane);
-                SpawnTokenOptional();
-                break;
-
-            case 1:
-                // STAGGERED (safe)
-                StartCoroutine(SpawnStaggeredSafe());
-                break;
-
-            case 2:
-                // TOKEN opportunity (breathing space)
-                SpawnToken();
-                break;
+            float lane = GetSafeLane();
+            SpawnObstacle(lane);
+            SpawnTokenSafe(lane);
         }
-    }
+        else
+        {
+            float firstLane = GetSafeLane();
+            SpawnObstacle(firstLane);
 
-    IEnumerator SpawnStaggeredSafe()
-    {
-        float firstLane = GetSafeLane();
-        SpawnObstacle(firstLane);
+            yield return new WaitForSeconds(0.5f); // ✅ BIGGER GAP
 
-        yield return new WaitForSeconds(0.35f);
+            float secondLane = OppositeLane(firstLane);
+            SpawnObstacle(secondLane);
 
-        float secondLane = OppositeLane(firstLane);
-        SpawnObstacle(secondLane);
+            SpawnTokenSafe(secondLane);
+        }
 
-        SpawnTokenOptional();
+        // ✅ enforce spacing between patterns
+        yield return new WaitForSeconds(0.4f);
+
+        _canSpawn = true;
     }
 
     float GetSafeLane()
     {
         float lane;
 
-        // Prevent repeating same lane too often (avoids unfair stacking)
         if (Random.value > 0.6f)
-        {
             lane = OppositeLane(_lastLane);
-        }
         else
-        {
             lane = RandomLane();
-        }
 
         _lastLane = lane;
         return lane;
@@ -107,9 +95,7 @@ public class Spawner : MonoBehaviour
 
     float OppositeLane(float lane)
     {
-        if (lane == 2f) return -2f;
-        if (lane == -2f) return 2f;
-        return RandomLane();
+        return lane == 2f ? -2f : 2f;
     }
 
     void SpawnObstacle(float y)
@@ -118,8 +104,8 @@ public class Spawner : MonoBehaviour
 
         GameObject obstacle = Instantiate(obstaclePrefab, pos, Quaternion.identity);
 
-        float width = Random.Range(0.6f, 1.8f);
-        float height = Random.Range(1f, 2.5f);
+        float width = Random.Range(0.6f, 1.4f);
+        float height = Random.Range(1f, 1.8f); // ✅ LOWER HEIGHT = NO BLOCKING
 
         obstacle.transform.localScale = new Vector3(width, height, 1f);
 
@@ -131,28 +117,22 @@ public class Spawner : MonoBehaviour
         }
     }
 
-    void SpawnTokenOptional()
-    {
-        if (Random.value > 0.4f)
-        {
-            SpawnToken();
-        }
-    }
-
-    void SpawnToken()
+    void SpawnTokenSafe(float obstacleLane)
     {
         float y;
 
-        int lane = Random.Range(0, 3);
+        // ✅ ALWAYS opposite or middle = never blocked
+        int choice = Random.Range(0, 2);
 
-        if (lane == 0)
-            y = -1.5f; // bottom
-        else if (lane == 1)
-            y = 0f;    // middle
+        if (choice == 0)
+            y = 0f; // middle safe lane
         else
-            y = 1.5f;  // top
+            y = (obstacleLane == 2f) ? -1.5f : 1.5f;
 
-        Vector3 pos = new Vector3(10f, y, 0f);
+        // ✅ spawn AFTER obstacle (never overlap)
+        float xOffset = Random.Range(12f, 14f);
+
+        Vector3 pos = new Vector3(xOffset, y, 0f);
 
         Instantiate(tokenPrefab, pos, Quaternion.identity);
     }
