@@ -28,19 +28,34 @@ public class Spawner : MonoBehaviour
             _timer = 0f;
         }
 
-        // ✅ Smooth difficulty (every 25s)
+        // Difficulty timer
         _speedTimer += Time.deltaTime;
 
         if (_speedTimer >= 25f)
         {
-            ObstacleMover.globalSpeed += 0.05f;
+            // Increase difficulty ONLY if below safe limit
+            if (ObstacleMover.globalSpeed < 12f)
+            {
+                ObstacleMover.globalSpeed += 0.05f;
+            }
+            else
+            {
+                // If too fast → slightly reduce (prevents impossible state)
+                ObstacleMover.globalSpeed -= 0.1f;
+            }
+
             _speedTimer = 0f;
         }
 
-        // ✅ Slower difficulty ramp
+        // Spawn rate control
         if (spawnRate > minSpawnRate)
         {
             spawnRate -= Time.deltaTime * 0.02f;
+        }
+        else
+        {
+            // If too fast spawning → ease it slightly
+            spawnRate += Time.deltaTime * 0.01f;
         }
     }
 
@@ -136,4 +151,5 @@ public class Spawner : MonoBehaviour
 
         Instantiate(tokenPrefab, pos, Quaternion.identity);
     }
+    
 }
