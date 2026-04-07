@@ -13,6 +13,7 @@ public class Spawner : MonoBehaviour
     private float speedTimer = 0f;
 
     private bool spawnTokenNext = false;
+    private bool lastWasTop = false;
 
     void Update()
     {
@@ -45,40 +46,54 @@ public class Spawner : MonoBehaviour
     {
         if (!spawnTokenNext)
         {
-            // 🔴 SPAWN OBSTACLE
-            float y = Random.value > 0.5f ? -2f : 2f;
+            float y;
 
-            Vector3 spawnPos = new Vector3(10f, y, 0f);
-
-            GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);
-
-            // Random size
-            float randomWidth = Random.Range(0.5f, 2f);
-            float randomHeight = Random.Range(1f, 3f);
-
-            obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
-
-            // Set color
-            SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
-            if (sr != null)
+            // Alternate top and bottom for fairness
+            if (lastWasTop)
             {
-                sr.color = (y < 0) ? groundColor : ceilingColor;
+                y = -2f; // bottom
+                lastWasTop = false;
+            }
+            else
+            {
+                y = 2f; // top
+                lastWasTop = true;
             }
 
-            spawnTokenNext = true; // next spawn will be token
+            SpawnObstacle(y);
+
+            spawnTokenNext = true; // next spawn = token
         }
         else
         {
-            // ⭐ SPAWN TOKEN BETWEEN OBSTACLES
             SpawnTokenBetween();
-            spawnTokenNext = false; // next spawn will be obstacle
+            spawnTokenNext = false;
+        }
+    }
+
+    void SpawnObstacle(float y)
+    {
+        Vector3 spawnPos = new Vector3(10f, y, 0f);
+
+        GameObject obstacle = Instantiate(obstaclePrefab, spawnPos, Quaternion.identity);
+
+        float randomWidth = Random.Range(0.5f, 2f);
+        float randomHeight = Random.Range(1f, 3f);
+
+        obstacle.transform.localScale = new Vector3(randomWidth, randomHeight, 1f);
+
+        SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
+
+        if (sr != null)
+        {
+            sr.color = (y < 0) ? groundColor : ceilingColor;
         }
     }
 
     void SpawnTokenBetween()
     {
-        // Place token in safe lane between floor & ceiling
-        float y = Random.value > 0.5f ? -1.5f : 1.5f;
+        // Always spawn token in SAFE SPACE (middle)
+        float y = 0f;
 
         Vector3 tokenPos = new Vector3(10f, y, 0f);
 
