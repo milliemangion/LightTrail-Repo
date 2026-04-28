@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
     public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI gameOverText;
+    public GameObject gameOverPanel; // panel reference
 
     private int score = 0;
     private bool isGameOver = false;
@@ -16,9 +18,23 @@ public class GameManager : MonoBehaviour
         instance = this;
     }
 
+    void Start()
+    {
+        score = 0;
+        isGameOver = false;
+
+        scoreText.text = "Score: 0";
+
+        // ✅ hide UI at start
+        if (gameOverText != null)
+            gameOverText.text = "";
+
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+    }
+
     void Update()
     {
-        // Restart on R
         if (isGameOver && Input.GetKeyDown(KeyCode.R))
         {
             Time.timeScale = 1f;
@@ -28,14 +44,25 @@ public class GameManager : MonoBehaviour
 
     public void AddScore(int amount)
     {
+        if (isGameOver) return;
+
         score += amount;
         scoreText.text = "Score: " + score;
     }
 
     public void GameOver()
     {
+        if (isGameOver) return;
+
         isGameOver = true;
-        scoreText.text += "\nGAME OVER\nPress R to Restart";
+
+        // ✅ show panel + text
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(true);
+
+        if (gameOverText != null)
+            gameOverText.text = "GAME OVER\nPress R to Restart";
+
         Time.timeScale = 0f;
     }
 }
