@@ -8,35 +8,47 @@ public class UIFade : MonoBehaviour
 
     void Awake()
     {
+        // Auto-assign if not set
         if (canvasGroup == null)
             canvasGroup = GetComponent<CanvasGroup>();
 
+        // Start invisible
         canvasGroup.alpha = 0f;
     }
 
     public void FadeIn()
     {
         StopAllCoroutines();
-        StartCoroutine(FadeRoutine());
+        StartCoroutine(FadeRoutine(0f, 1f));
     }
 
-    IEnumerator FadeRoutine()
+    public void FadeOut()
+    {
+        StopAllCoroutines();
+        StartCoroutine(FadeRoutine(1f, 0f));
+    }
+
+    IEnumerator FadeRoutine(float start, float end)
     {
         float time = 0f;
+
+        canvasGroup.alpha = start;
 
         while (time < duration)
         {
             float t = time / duration;
 
-            // smooth ease-out
-            t = 1f - Mathf.Pow(1f - t, 4f);
+            // Smooth easing (ease-out)
+            t = 1f - Mathf.Pow(1f - t, 3f);
 
-            canvasGroup.alpha = t;
+            canvasGroup.alpha = Mathf.Lerp(start, end, t);
 
-            time += Time.unscaledDeltaTime; // ⭐ IMPORTANT
+            // IMPORTANT: works even when Time.timeScale = 0
+            time += Time.unscaledDeltaTime;
+
             yield return null;
         }
 
-        canvasGroup.alpha = 1f;
+        canvasGroup.alpha = end;
     }
 }
