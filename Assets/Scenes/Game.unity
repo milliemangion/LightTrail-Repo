@@ -931,6 +931,8 @@ GameObject:
   - component: {fileID: 741185242}
   - component: {fileID: 741185244}
   - component: {fileID: 741185243}
+  - component: {fileID: 741185246}
+  - component: {fileID: 741185245}
   m_Layer: 5
   m_Name: GameOverPanel
   m_TagString: Untagged
@@ -971,7 +973,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.9843137}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -996,6 +998,32 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 741185241}
   m_CullTransparentMesh: 1
+--- !u!225 &741185245
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741185241}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &741185246
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741185241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 849040b9e06003c48b8d8d39f91b7a3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIFade
+  canvasGroup: {fileID: 741185245}
+  duration: 0.5
 --- !u!1 &1313335331
 GameObject:
   m_ObjectHideFlags: 0
@@ -1169,7 +1197,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 1, g: 0, b: 1, a: 1}
@@ -1563,6 +1591,13 @@ MonoBehaviour:
   scoreText: {fileID: 2123701557}
   gameOverText: {fileID: 1945350154}
   gameOverPanel: {fileID: 741185241}
+  grounds:
+  - {fileID: 1661144742}
+  - {fileID: 229619862}
+  ceilings:
+  - {fileID: 1802410199}
+  - {fileID: 179712701}
+  playerRb: {fileID: 1478228898}
 --- !u!4 &1864011990
 Transform:
   m_ObjectHideFlags: 0
