@@ -94,11 +94,13 @@ public class PlayerMovement : MonoBehaviour
             // Spawn burst effect
             if (tokenBurstPrefab != null)
             {
-                Instantiate(
+                GameObject burst = Instantiate(
                     tokenBurstPrefab,
                     other.transform.position,
                     Quaternion.identity
                 );
+
+                Destroy(burst, 5f);
             }
 
             Destroy(other.gameObject);
