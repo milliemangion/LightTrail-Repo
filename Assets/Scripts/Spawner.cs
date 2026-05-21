@@ -30,7 +30,7 @@ public class Spawner : MonoBehaviour
 
     void Update()
     {
-        // Stop everything after death
+        // STOP EVERYTHING AFTER GAME OVER
         if (stopSpawning)
             return;
 
@@ -64,27 +64,41 @@ public class Spawner : MonoBehaviour
 
     IEnumerator SpawnPattern()
     {
+        // EXTRA SAFETY
+        if (stopSpawning)
+            yield break;
+
         _canSpawn = false;
 
         int pattern = Random.Range(0, 3);
 
-        // Single obstacle
+        // SINGLE OBSTACLE
         if (pattern == 0)
         {
             float lane = GetSafeLane();
+
+            if (stopSpawning)
+                yield break;
 
             SpawnObstacle(lane);
             SpawnTokenSafe(lane);
         }
 
-        // Double obstacle
+        // DOUBLE OBSTACLE
         else if (pattern == 1)
         {
             float firstLane = GetSafeLane();
 
+            if (stopSpawning)
+                yield break;
+
             SpawnObstacle(firstLane);
 
             yield return new WaitForSeconds(0.5f);
+
+            // IMPORTANT FIX
+            if (stopSpawning)
+                yield break;
 
             float secondLane = DifferentLane(firstLane);
 
@@ -92,9 +106,12 @@ public class Spawner : MonoBehaviour
             SpawnTokenSafe(secondLane);
         }
 
-        // Middle obstacle pattern
+        // MIDDLE PATTERN
         else
         {
+            if (stopSpawning)
+                yield break;
+
             SpawnObstacle(MiddleLane());
             SpawnTokenSafe(MiddleLane());
         }
@@ -164,16 +181,23 @@ public class Spawner : MonoBehaviour
 
     void SpawnObstacle(float y)
     {
+        // EXTRA SAFETY
+        if (stopSpawning)
+            return;
+
         Vector3 pos = new Vector3(10f, y, 0f);
 
-        GameObject obstacle = Instantiate(obstaclePrefab, pos, Quaternion.identity);
+        GameObject obstacle =
+            Instantiate(obstaclePrefab, pos, Quaternion.identity);
 
         float width = Random.Range(0.6f, 1.4f);
         float height = Random.Range(1f, 1.8f);
 
-        obstacle.transform.localScale = new Vector3(width, height, 1f);
+        obstacle.transform.localScale =
+            new Vector3(width, height, 1f);
 
-        SpriteRenderer sr = obstacle.GetComponent<SpriteRenderer>();
+        SpriteRenderer sr =
+            obstacle.GetComponent<SpriteRenderer>();
 
         if (sr != null)
         {
@@ -187,17 +211,23 @@ public class Spawner : MonoBehaviour
             }
             else
             {
-                // Randomly use ground or ceiling colour
-                sr.color = Random.value > 0.5f ? groundColor : ceilingColor;
+                sr.color =
+                    Random.value > 0.5f
+                    ? groundColor
+                    : ceilingColor;
             }
         }
     }
 
     void SpawnTokenSafe(float obstacleLane)
     {
+        // EXTRA SAFETY
+        if (stopSpawning)
+            return;
+
         float y = 0f;
 
-        // Safe positions AWAY from platforms
+        // Safe positions away from platforms
         float lowerSafe = ground.position.y + 3f;
         float upperSafe = ceiling.position.y - 3f;
 
@@ -209,19 +239,19 @@ public class Spawner : MonoBehaviour
             y = 0f;
         }
 
-        // Upper air space
+        // Upper area
         else if (choice == 1)
         {
             y = Random.Range(1.5f, upperSafe);
         }
 
-        // Lower air space
+        // Lower area
         else
         {
             y = Random.Range(lowerSafe, -1.5f);
         }
 
-        // Prevent token spawning on same lane as obstacle
+        // Prevent overlap with obstacle lane
         if (Mathf.Abs(y - obstacleLane) < 1.5f)
         {
             y = 0f;
@@ -232,7 +262,8 @@ public class Spawner : MonoBehaviour
         Vector3 pos = new Vector3(xOffset, y, 0f);
 
         // Extra overlap protection
-        Collider2D hit = Physics2D.OverlapCircle(pos, 0.8f);
+        Collider2D hit =
+            Physics2D.OverlapCircle(pos, 0.8f);
 
         if (hit == null)
         {
