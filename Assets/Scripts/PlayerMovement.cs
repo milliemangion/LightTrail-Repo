@@ -3,6 +3,13 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Audio")]
+    public AudioSource audioSource;
+
+    public AudioClip jumpSound;
+    public AudioClip tokenSound;
+    public AudioClip deathSound;
+
     [Header("Particles")]
     public ParticleSystem trailParticles;
     public GameObject tokenBurstPrefab;
@@ -12,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     public float rotationDuration = 0.15f;
 
     private Rigidbody2D rb;
+
     private bool isUpsideDown = false;
     private bool isDead = false;
 
@@ -29,16 +37,23 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDead)
             return;
-        
+
         // Keep player fixed horizontally
         if (rb != null)
         {
-            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            rb.linearVelocity =
+                new Vector2(0f, rb.linearVelocity.y);
         }
 
         // Gravity flip
         if (Input.GetKeyDown(KeyCode.Space))
         {
+            // PLAY JUMP SOUND
+            if (audioSource != null && jumpSound != null)
+            {
+                audioSource.PlayOneShot(jumpSound);
+            }
+
             // Emit particles
             if (trailParticles != null)
             {
@@ -59,6 +74,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         StopAllCoroutines();
+
         StartCoroutine(RotatePlayer());
     }
 
@@ -66,8 +82,11 @@ public class PlayerMovement : MonoBehaviour
     {
         float elapsed = 0f;
 
-        float startRotation = transform.eulerAngles.z;
-        float targetRotation = isUpsideDown ? 180f : 0f;
+        float startRotation =
+            transform.eulerAngles.z;
+
+        float targetRotation =
+            isUpsideDown ? 180f : 0f;
 
         // Prevent long spinning
         if (Mathf.Abs(startRotation - targetRotation) > 180f)
@@ -82,9 +101,19 @@ public class PlayerMovement : MonoBehaviour
         {
             float t = elapsed / rotationDuration;
 
-            float zRotation = Mathf.Lerp(startRotation, targetRotation, t);
+            float zRotation =
+                Mathf.Lerp(
+                    startRotation,
+                    targetRotation,
+                    t
+                );
 
-            transform.rotation = Quaternion.Euler(0f, 0f, zRotation);
+            transform.rotation =
+                Quaternion.Euler(
+                    0f,
+                    0f,
+                    zRotation
+                );
 
             elapsed += Time.deltaTime;
 
@@ -92,17 +121,30 @@ public class PlayerMovement : MonoBehaviour
         }
 
         transform.rotation =
-            Quaternion.Euler(0f, 0f, targetRotation % 360f);
+            Quaternion.Euler(
+                0f,
+                0f,
+                targetRotation % 360f
+            );
     }
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // Game Over
+        // GAME OVER
         if (other.CompareTag("Obstacle"))
         {
+            if (isDead)
+                return;
+
             isDead = true;
 
-            // Stop all current movement instantly
+            // PLAY DEATH SOUND
+            if (audioSource != null && deathSound != null)
+            {
+                audioSource.PlayOneShot(deathSound);
+            }
+
+            // Stop movement
             rb.linearVelocity = Vector2.zero;
 
             // Disable gravity temporarily
@@ -111,9 +153,19 @@ public class PlayerMovement : MonoBehaviour
             GameManager.instance.GameOver();
         }
 
-        // Collect Token
+        // COLLECT TOKEN
         if (other.CompareTag("Token"))
         {
+            // PLAY TOKEN SOUND INSTANTLY
+            if (tokenSound != null)
+            {
+                AudioSource.PlayClipAtPoint(
+                    tokenSound,
+                    Camera.main.transform.position,
+                    1f
+                );
+            }
+
             // Spawn particle burst
             if (tokenBurstPrefab != null)
             {

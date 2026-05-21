@@ -221,51 +221,62 @@ public class Spawner : MonoBehaviour
 
     void SpawnTokenSafe(float obstacleLane)
     {
-        // EXTRA SAFETY
+        // STOP AFTER GAME OVER
         if (stopSpawning)
             return;
 
         float y = 0f;
 
-        // Safe positions away from platforms
-        float lowerSafe = ground.position.y + 3f;
-        float upperSafe = ceiling.position.y - 3f;
-
-        int choice = Random.Range(0, 3);
-
-        // Middle area
-        if (choice == 0)
+        // POSSIBLE SAFE LANES
+        float[] possibleLanes =
         {
-            y = 0f;
+            GroundLane(),
+            MiddleLane(),
+            CeilingLane()
+        };
+
+        // PICK A LANE DIFFERENT FROM OBSTACLE
+        do
+        {
+            y = possibleLanes[
+                Random.Range(0, possibleLanes.Length)
+            ];
+
+        } while (Mathf.Abs(y - obstacleLane) < 1f);
+
+        // PUSH TOKEN AWAY FROM WALLS
+        if (Mathf.Abs(y - GroundLane()) < 0.1f)
+        {
+            y += 2f;
         }
 
-        // Upper area
-        else if (choice == 1)
+        if (Mathf.Abs(y - CeilingLane()) < 0.1f)
         {
-            y = Random.Range(1.5f, upperSafe);
+            y -= 2f;
         }
 
-        // Lower area
-        else
-        {
-            y = Random.Range(lowerSafe, -1.5f);
-        }
-
-        // Prevent overlap with obstacle lane
-        if (Mathf.Abs(y - obstacleLane) < 1.5f)
-        {
-            y = 0f;
-        }
-
+        // RANDOM X POSITION
         float xOffset = Random.Range(12f, 14f);
 
         Vector3 pos = new Vector3(xOffset, y, 0f);
 
-        // Extra overlap protection
-        Collider2D hit =
-            Physics2D.OverlapCircle(pos, 0.8f);
+        // FINAL SAFETY CHECK
+        Collider2D[] hits =
+            Physics2D.OverlapCircleAll(pos, 1f);
 
-        if (hit == null)
+        bool blocked = false;
+
+        foreach (Collider2D hit in hits)
+        {
+            if (hit.CompareTag("Obstacle"))
+            {
+                blocked = true;
+                break;
+            }
+        }
+
+        // SPAWN ONLY IF SAFE
+        if (!blocked)
         {
             Instantiate(tokenPrefab, pos, Quaternion.identity);
         }

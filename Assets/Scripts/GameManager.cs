@@ -5,6 +5,11 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("Audio")]
+    public AudioSource audioSource;
+
+    public AudioClip highScoreSound;
+
     public static GameManager instance;
 
     [Header("UI")]
@@ -23,6 +28,9 @@ public class GameManager : MonoBehaviour
 
     private bool isGameOver = false;
 
+    // Prevent repeated high score sound
+    private bool newHighScoreReached = false;
+
     void Awake()
     {
         instance = this;
@@ -31,7 +39,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         score = 0;
+
         isGameOver = false;
+
+        newHighScoreReached = false;
 
         // Load saved high score
         highScore = PlayerPrefs.GetInt("HighScore", 0);
@@ -41,19 +52,23 @@ public class GameManager : MonoBehaviour
 
         // Hide BEST text at start
         highScoreText.gameObject.SetActive(false);
+
         highScoreText.text = "";
 
         // Hide game over UI
         gameOverPanel.SetActive(false);
+
         gameOverText.text = "";
 
         // Reset game state
         Time.timeScale = 1f;
+
         Spawner.stopSpawning = false;
     }
 
     void Update()
     {
+        // Restart game
         if (isGameOver && Input.GetKeyDown(KeyCode.R))
         {
             Time.timeScale = 1f;
@@ -73,13 +88,26 @@ public class GameManager : MonoBehaviour
 
         scoreText.text = "SCORE: " + score;
 
-        // Save new high score
+        // NEW HIGH SCORE
         if (score > highScore)
         {
             highScore = score;
 
             PlayerPrefs.SetInt("HighScore", highScore);
+
             PlayerPrefs.Save();
+
+            // PLAY SOUND ONLY ONCE
+            if (!newHighScoreReached)
+            {
+                newHighScoreReached = true;
+
+                if (audioSource != null &&
+                    highScoreSound != null)
+                {
+                    audioSource.PlayOneShot(highScoreSound);
+                }
+            }
         }
     }
 
@@ -89,6 +117,21 @@ public class GameManager : MonoBehaviour
             return;
 
         isGameOver = true;
+
+        // STOP MUSIC
+        GameObject music =
+            GameObject.FindGameObjectWithTag("Music");
+
+        if (music != null)
+        {
+            AudioSource audio =
+                music.GetComponent<AudioSource>();
+
+            if (audio != null)
+            {
+                StartCoroutine(FadeMusic(audio));
+            }
+        }
 
         // Stop spawning
         Spawner.stopSpawning = true;
@@ -101,15 +144,18 @@ public class GameManager : MonoBehaviour
 
         // Show BEST score ONLY on game over
         highScoreText.gameObject.SetActive(true);
+
         highScoreText.text =
             "BEST: " + highScore;
 
         // Fade UI
-        UIFade fade = gameOverPanel.GetComponent<UIFade>();
+        UIFade fade =
+            gameOverPanel.GetComponent<UIFade>();
 
         if (fade != null)
         {
             fade.canvasGroup.alpha = 0f;
+
             fade.FadeIn();
         }
 
@@ -120,7 +166,7 @@ public class GameManager : MonoBehaviour
     IEnumerator DeathSequence()
     {
         // Small dramatic pause
-        yield return new WaitForSeconds(0.05f);
+        yield return new WaitForSecondsRealtime(0.05f);
 
         // Remove obstacles/tokens
         ClearScene();
@@ -139,7 +185,8 @@ public class GameManager : MonoBehaviour
         // Dramatic fall
         if (playerRb != null)
         {
-            playerRb.linearVelocity = new Vector2(0, -6f);
+            playerRb.linearVelocity =
+                new Vector2(0, -6f);
 
             playerRb.gravityScale = 1.5f;
 
@@ -147,10 +194,27 @@ public class GameManager : MonoBehaviour
         }
 
         // Wait before freeze
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSecondsRealtime(1f);
 
-        // Freeze game
+        // Freeze gameplay
         Time.timeScale = 0f;
+    }
+
+    IEnumerator FadeMusic(AudioSource audio)
+    {
+        float startVolume = audio.volume;
+
+        while (audio.volume > 0)
+        {
+            audio.volume -=
+                startVolume * Time.unscaledDeltaTime;
+
+            yield return null;
+        }
+
+        audio.Stop();
+
+        audio.volume = startVolume;
     }
 
     void ClearScene()
