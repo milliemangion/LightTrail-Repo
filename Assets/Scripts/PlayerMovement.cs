@@ -9,25 +9,37 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Movement")]
     public float gravityScale = 3f;
+    public float rotationDuration = 0.15f;
 
     private Rigidbody2D rb;
     private bool isUpsideDown = false;
+    private bool isDead = false;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        rb.gravityScale = gravityScale;
+
+        if (rb != null)
+        {
+            rb.gravityScale = gravityScale;
+        }
     }
 
     void Update()
     {
+        if (isDead)
+            return;
+        
         // Keep player fixed horizontally
-        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+        if (rb != null)
+        {
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        }
 
         // Gravity flip
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // Emit flip particles
+            // Emit particles
             if (trailParticles != null)
             {
                 trailParticles.Emit(Random.Range(10, 20));
@@ -41,7 +53,10 @@ public class PlayerMovement : MonoBehaviour
     {
         isUpsideDown = !isUpsideDown;
 
-        rb.gravityScale *= -1;
+        if (rb != null)
+        {
+            rb.gravityScale *= -1;
+        }
 
         StopAllCoroutines();
         StartCoroutine(RotatePlayer());
@@ -49,13 +64,12 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator RotatePlayer()
     {
-        float duration = 0.15f;
         float elapsed = 0f;
 
         float startRotation = transform.eulerAngles.z;
         float targetRotation = isUpsideDown ? 180f : 0f;
 
-        // Prevent weird long spins
+        // Prevent long spinning
         if (Mathf.Abs(startRotation - targetRotation) > 180f)
         {
             if (startRotation > targetRotation)
@@ -64,20 +78,21 @@ public class PlayerMovement : MonoBehaviour
                 startRotation += 360f;
         }
 
-        while (elapsed < duration)
+        while (elapsed < rotationDuration)
         {
-            float t = elapsed / duration;
+            float t = elapsed / rotationDuration;
 
-            float z = Mathf.Lerp(startRotation, targetRotation, t);
+            float zRotation = Mathf.Lerp(startRotation, targetRotation, t);
 
-            transform.rotation = Quaternion.Euler(0, 0, z);
+            transform.rotation = Quaternion.Euler(0f, 0f, zRotation);
 
             elapsed += Time.deltaTime;
 
             yield return null;
         }
 
-        transform.rotation = Quaternion.Euler(0, 0, targetRotation % 360f);
+        transform.rotation =
+            Quaternion.Euler(0f, 0f, targetRotation % 360f);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -85,13 +100,21 @@ public class PlayerMovement : MonoBehaviour
         // Game Over
         if (other.CompareTag("Obstacle"))
         {
+            isDead = true;
+
+            // Stop all current movement instantly
+            rb.linearVelocity = Vector2.zero;
+
+            // Disable gravity temporarily
+            rb.gravityScale = 0f;
+
             GameManager.instance.GameOver();
         }
 
         // Collect Token
         if (other.CompareTag("Token"))
         {
-            // Spawn burst effect
+            // Spawn particle burst
             if (tokenBurstPrefab != null)
             {
                 GameObject burst = Instantiate(
@@ -103,8 +126,10 @@ public class PlayerMovement : MonoBehaviour
                 Destroy(burst, 5f);
             }
 
+            // Remove token
             Destroy(other.gameObject);
 
+            // Add score
             GameManager.instance.AddScore(1);
         }
     }

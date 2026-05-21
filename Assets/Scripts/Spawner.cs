@@ -195,33 +195,48 @@ public class Spawner : MonoBehaviour
 
     void SpawnTokenSafe(float obstacleLane)
     {
-        float y;
+        float y = 0f;
+
+        // Safe positions AWAY from platforms
+        float lowerSafe = ground.position.y + 3f;
+        float upperSafe = ceiling.position.y - 3f;
 
         int choice = Random.Range(0, 3);
 
+        // Middle area
         if (choice == 0)
         {
-            y = MiddleLane();
-        }
-        else if (choice == 1)
-        {
-            y = GroundLane();
-        }
-        else
-        {
-            y = CeilingLane();
+            y = 0f;
         }
 
-        // Prevent token spawning directly inside obstacle
-        if (Mathf.Abs(y - obstacleLane) < 0.1f)
+        // Upper air space
+        else if (choice == 1)
         {
-            y = MiddleLane();
+            y = Random.Range(1.5f, upperSafe);
+        }
+
+        // Lower air space
+        else
+        {
+            y = Random.Range(lowerSafe, -1.5f);
+        }
+
+        // Prevent token spawning on same lane as obstacle
+        if (Mathf.Abs(y - obstacleLane) < 1.5f)
+        {
+            y = 0f;
         }
 
         float xOffset = Random.Range(12f, 14f);
 
         Vector3 pos = new Vector3(xOffset, y, 0f);
 
-        Instantiate(tokenPrefab, pos, Quaternion.identity);
+        // Extra overlap protection
+        Collider2D hit = Physics2D.OverlapCircle(pos, 0.8f);
+
+        if (hit == null)
+        {
+            Instantiate(tokenPrefab, pos, Quaternion.identity);
+        }
     }
 }
